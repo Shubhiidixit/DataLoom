@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DataLoom - Database MCP</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'optimizer/mcp-styles.css' %}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Inter:wght@400;500&family=Fira+Code:wght@400;500&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo-container">
+                <a href="{% url 'landing' %}" class="logo-link">
+                    <div class="logo">
+                        <i class="fas fa-database"></i>
+                        <i class="fas fa-comment-alt"></i>
+                    </div>
+                    <h1>DataLoom</h1>
+                </a>
+            </div>
+            <div class="header-right">
+                <a href="{% url 'optimizer' %}" class="nav-link">Database Optimization</a>
+                <button class="theme-toggle" id="themeToggle">
+                    <i class="fas fa-moon"></i>
+                    <i class="fas fa-sun"></i>
+                </button>
+            </div>
+        </header>
+
+        <main>
+            <div class="page-title">
+                <h2>Database MCP</h2>
+                <p>Interact with your database using natural language</p>
+            </div>
+
+            <div class="connection-section" id="connectionSection">
+                <h3>Connect to MySQL Database</h3>
+                <div class="connection-form">
+                    <div class="form-group">
+                        <label for="mysqlHost">Host</label>
+                        <input type="text" id="mysqlHost" value="localhost" placeholder="e.g., localhost or 127.0.0.1">
+                    </div>
+                    <div class="form-group">
+                        <label for="mysqlPort">Port</label>
+                        <input type="number" id="mysqlPort" value="3306" placeholder="e.g., 3306">
+                    </div>
+                    <div class="form-group">
+                        <label for="mysqlUsername">Username</label>
+                        <input type="text" id="mysqlUsername" placeholder="e.g., root">
+                    </div>
+                    <div class="form-group">
+                        <label for="mysqlPassword">Password</label>
+                        <input type="password" id="mysqlPassword" placeholder="Your MySQL password">
+                    </div>
+                    <div class="form-actions">
+                        <button id="connectBtn" class="btn primary-btn">
+                            <i class="fas fa-plug"></i> Connect
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="database-section" id="databaseSection" style="display: none;">
+                <h3>Select Database</h3>
+                <div class="database-selection">
+                    <div class="form-group">
+                        <label for="databaseSelect">Available Databases</label>
+                        <select id="databaseSelect" class="select-styled">
+                            <option value="">Select a database</option>
+                        </select>
+                    </div>
+                    <div class="form-actions">
+                        <button id="selectDatabaseBtn" class="btn primary-btn">
+                            <i class="fas fa-database"></i> Use Database
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="workspace-section" id="workspaceSection" style="display: none;">
+                <div class="workspace-container">
+                    <div class="sidebar">
+                        <div class="sidebar-header">
+                            <h3>Database Explorer</h3>
+                            <button id="refreshTablesBtn" class="icon-btn" title="Refresh Tables">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                        <div class="tables-list" id="tablesList">
+                            <!-- Tables will be populated here -->
+                        </div>
+                    </div>
+                    
+                    <div class="content-area">
+                        <div class="table-info" id="tableInfo">
+                            <h3>Table Structure</h3>
+                            <div class="table-structure" id="tableStructure">
+                                <p class="placeholder-text">Select a table to view its structure</p>
+                            </div>
+                        </div>
+                        
+                        <div class="nlp-section">
+                            <h3>Ask about your data</h3>
+                            <p class="helper-text">Describe what you want to know in plain English</p>
+                            <div class="examples-container">
+                                <div class="example-chip" data-query="Show all records from the selected table">Show all records</div>
+                                <div class="example-chip" data-query="Count the total number of records in this table">Count records</div>
+                                <div class="example-chip" data-query="Find the top 10 records sorted by the first column">Top 10 records</div>
+                            </div>
+                            <div class="nlp-input-container">
+                                <textarea id="nlpInput" placeholder="e.g., Show me all customers who made purchases last month" rows="3"></textarea>
+                                <button id="executeNlpBtn" class="btn primary-btn">
+                                    <i class="fas fa-magic"></i> Execute
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="results-section" id="resultsSection" style="display: none;">
+                            <div class="results-header">
+                                <h3>Results</h3>
+                                <div class="results-actions">
+                                    <button id="exportCsvBtn" class="btn secondary-btn" title="Export as CSV">
+                                        <i class="fas fa-file-csv"></i> CSV
+                                    </button>
+                                    <button id="exportJsonBtn" class="btn secondary-btn" title="Export as JSON">
+                                        <i class="fas fa-file-code"></i> JSON
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="generated-sql">
+                                <h4>Generated SQL</h4>
+                                <pre id="generatedSql"></pre>
+                            </div>
+                            
+                            <div class="results-table-container">
+                                <div id="resultsTable"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <div class="loading-overlay" id="loadingOverlay">
+            <div class="loading-spinner"></div>
+            <p id="loadingText">Connecting to database...</p>
+        </div>
+
+        <div class="toast" id="toast"></div>
+
+        <footer>
+            <!-- <p>&copy; 2025 DataLoom. All rights reserved.</p> -->
+        </footer>
+    </div>
+
+    <script src="{% static 'optimizer/mcp-script.js' %}"></script>
+</body>
+</html>
